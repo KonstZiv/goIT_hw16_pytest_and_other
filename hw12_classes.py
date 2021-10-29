@@ -29,12 +29,13 @@ class Phone:
 
     @phone.setter
     def phone(self, phone):
-        num = phone.translate(str.maketrans('', '', '+() -_'))
+        num = phone.translate(str.maketrans("", "", "+() -_[]xX"))
         if num.isdigit() and (3 <= len(num) <= 20):
             self.__phone = num
         else:
             raise ValueError(
-                'телефон при вводе может содержать от 3 до 20 цифр и символы: пробел +-()xX.[]_')
+                "телефон при вводе может содержать от 3 до 20 цифр и символы: пробел +-()xX.[]_"
+            )
 
     def __repr__(self):
         return self.phone
@@ -55,15 +56,15 @@ class Birthday:
 
     @birthday.setter
     def birthday(self, new_value):
-        if isinstance(new_value.date(), date):
+        if isinstance(new_value, datetime):
             if new_value.date() > date.today():
-                raise ValueError('введенная дата роджения в будущем')
+                raise ValueError("введенная дата роджения в будущем")
             self.__birthday = new_value
         else:
-            raise TypeError('поле Birthday.birthday должно быть типа datetime')
+            raise TypeError("поле Birthday.birthday должно быть типа datetime")
 
     def __repr__(self):
-        return self.birthday.strftime('%d-%m-%Y')
+        return self.birthday.strftime("%d-%m-%Y")
 
 
 class Record:
@@ -79,8 +80,7 @@ class Record:
         """добавляет номер телефона в существующую запись.
         Если такой номер есть - генерирует исключение"""
         if Phone(phone) in self.phones:
-            raise ValueError(
-                'добавление телефона: такой номер уже есть в списке')
+            raise ValueError("добавление телефона: такой номер уже есть в списке")
         else:
             self.phones.append(Phone(phone))
         return self
@@ -91,8 +91,7 @@ class Record:
         if Phone(phone) in self.phones:
             self.phones.remove(Phone(phone))
         else:
-            raise ValueError(
-                'операция удаления: такого телефона нет в данной записи')
+            raise ValueError("операция удаления: такого телефона нет в данной записи")
 
     def change_phone(self, old_phone, nev_phone):
         """замена номера телефона - удаление старого и добавление нового"""
@@ -100,18 +99,23 @@ class Record:
         self.add_phone(nev_phone)
 
     def days_tobirthday(self):
-        """возвращает количество дней до дня рождения от тпекущей даты"""
+        """возвращает количество дней до дня рождения от текущей даты"""
         if self.birthday:
-            if date.today() > self.birthday.birthday.replace(year=date.today().year):
-                return (self.birthday.birthday.replace(year=date.today().year + 1) -
-                        date.today()).days
-            return (self.birthday.birthday.replace(year=date.today().year) - date.today()).days
-        return f'Не введена дата родения для {self.name.value}'
+            if date.today() > self.birthday.birthday.replace(year=date.today().year).date():
+                return (
+                    self.birthday.birthday.replace(year=date.today().year + 1).date()
+                    - date.today()
+                ).days
+            return (
+                self.birthday.birthday.replace(year=date.today().year).date() - date.today()
+            ).days
+        return f"Не введена дата рождения для {self.name.value}"
 
     def __repr__(self):
         """форматирует и выводит одну запись в читаемом виде одной или нескольких строк
         (если запись содержит несколько телефонов)"""
-        st_format = f"| {self.name:.<40}| {self.birthday.__repr__(): <11} | {self.phones[0].__repr__() if self.phones else '': <20} |\n"
+        st_format = f"| {self.name:.<40}| {self.birthday.__repr__(): <11} | \
+        {self.phones[0].__repr__() if self.phones else '': <20} |\n"
         if len(self.phones) > 1:
             for elem in self.phones[1:]:
                 st_format += f" |                                         |             | {elem.__repr__(): <20} |\n"
@@ -127,14 +131,16 @@ class Record:
         date_stop=False, то сравнение проходит не по интервалу дат, а по\
         одной дате date. Если year=False - то при сравнении год не \
         учитывается, иначе год участвует в сравнении"""
-        if not self.birthday.birthday:
+        if not self.birthday:
             # если дата рождения не записана - возвращаем None
             return None
 
         data_start_local = datetime.strptime(data_start, "%d-%m-%Y")
-        data_stop_local = (datetime.strptime(
-            data_stop, "%d-%m-%Y") if data_stop else
-            datetime.strptime(data_start, "%d-%m-%Y") + timedelta(days=1))
+        data_stop_local = (
+            datetime.strptime(data_stop, "%d-%m-%Y")
+            if data_stop
+            else datetime.strptime(data_start, "%d-%m-%Y") + timedelta(days=1)
+        )
         data_record_local = self.birthday.birthday
 
         if not year:
@@ -166,11 +172,11 @@ class AdressBook(UserDict):
     """класс определяет объект адресная книга, содержаший объекты типа Record"""
 
     def out_iterator(self, num):
-        '''метод возвращает генератор, который возвращает на каждой итерации
+        """метод возвращает генератор, который возвращает на каждой итерации
         объект класса AdressBook, содержащий n записей из вызывающего метод
         объекта AdressBook, на последнем шаге (исчерпание записей
         вызывающего объекта) выводятся оставшиеся записи
-        '''
+        """
         # количество элементов выводимых за один вызов метода
         # счетчик общего количества выведенных записей
         k = 0
@@ -182,19 +188,17 @@ class AdressBook(UserDict):
             result = AdressBook()
             # определяем сколько записей можно вывести на текущем шаге (пна последнем шаге
             # выводим меньше чем n)
-            max_iter = key_list_max if len(
-                key_list[k:]) < num else k + num
+            max_iter = key_list_max if len(key_list[k:]) < num else k + num
             for i in range(k, max_iter):
                 result.add_record(self[key_list[i]])
                 k += 1
             yield result
 
     def add_record(self, record: Record):
-        """ добавляет новую запись в существующую адрессную книгу.
+        """добавляет новую запись в существующую адрессную книгу.
         Если запись с таким ключем (именем) уже существует - генерирует исключение"""
         if record.name in self:
-            raise KeyError(
-                'Запись с таким именем уже существует в адресной книге')
+            raise KeyError("Запись с таким именем уже существует в адресной книге")
         self[record.name] = record
 
     def del_record(self, name: str):
@@ -203,7 +207,7 @@ class AdressBook(UserDict):
         if name in self:
             self.pop(name)
         else:
-            raise KeyError('записи с таким именем нет в адресной книге')
+            raise KeyError("записи с таким именем нет в адресной книге")
 
     def search(self, pattern):
         """# возвращает объект класса AdressBook, содержащий
@@ -228,25 +232,27 @@ class AdressBook(UserDict):
         return result
 
     def __repr__(self) -> str:
-        res = ''
+        res = ""
         for elem in self.values():
             res += elem.__repr__()
         return res
 
     def add_fake_records(self, num):
         """Вносит в адресную книгу num фейковых записей"""
-        fake = Faker(['uk_UA', 'ru_RU'])
+        fake = Faker(["uk_UA", "ru_RU"])
         for _ in range(num):
             name = fake.name()
             phone = fake.phone_number()
             date_of_birth = fake.date_of_birth(
-                minimum_age=10, maximum_age=115).strftime('%d-%m-%Y')
+                minimum_age=10, maximum_age=115
+            ).strftime("%d-%m-%Y")
             record = Record(name, date_of_birth).add_phone(phone)
             self.add_record(record)
-            print(f'Добавлена запись: {name}  {date_of_birth}  {phone}')
+            print(f"Добавлена запись: {name}  {date_of_birth}  {phone}")
             print(
-                f'вид в record: {record.name}  {record.birthday.birthday:%d-%m-%Y}  {record.phones[0].phone}')
+                f"вид в record: {record.name}  {record.birthday.birthday:%d-%m-%Y}  {record.phones[0].phone}"
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

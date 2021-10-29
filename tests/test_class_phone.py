@@ -1,9 +1,12 @@
-from assistant.address__book_classes import Phone, Birthday, Record
-from datetime import date, datetime
+"""Тест для проверки класса Phone"""
+from hw12_classes import Phone
 
 
 def test_phone():
-    a = Phone('+38-(050)-32312345')
-    b = Phone('38[050]+32312345')
-    assert a.phone == '3805032312345'
-    assert b.phone == '3805032312345'
+    """Проверяет правильность очистки от лишних символов и
+    правильность сравнения телефонов"""
+    phone_1 = Phone('+38-(050)-32312345')
+    phone_2 = Phone('38[050]+32312345')
+    assert phone_1.phone == '3805032312345'
+    assert phone_2.phone == '3805032312345'
+    assert phone_1 == phone_2
